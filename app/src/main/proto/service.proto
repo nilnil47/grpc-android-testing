@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package messaging;
+//option java_package = "io.grpc.examples";
+
+
+service MapleService {
+  rpc SendChatMessage(ChatMessage) returns (Empty);
+  rpc StartChatMessageStreaming(Empty) returns (stream ChatMessage);
+
+//  rpc Upload(C) returns (UploadStatus) {}
+}
+
+message ChatMessage {
+  int32 id = 1;
+  string message = 2;
+}
+
+message Empty {}

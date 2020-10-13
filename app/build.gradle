@@ -1,4 +1,37 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'com.google.protobuf' version '0.8.13'
+}
+
+//sourceSets
+//SourceSets {
+//
+//}
+
+protobuf {
+//    generatedFilesBaseDir = "$android.sourceSets.main.java.srcDirs"
+    generatedFilesBaseDir = "$projectDir/src/main/generated/"
+    protoc { artifact = 'com.google.protobuf:protoc:3.12.0' }
+    plugins {
+        grpc { artifact = 'io.grpc:protoc-gen-grpc-java:1.32.1' // CURRENT_GRPC_VERSION
+        }
+    }
+    generateProtoTasks {
+//        distsDirectory = android.sourceSets.main.java.srcDirs
+//        outputDirectory = android.sourceSets.main.java.srcDirs
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+            task.plugins {
+                grpc { // Options added to --grpc_out
+                    option 'lite' }
+            }
+        }
+    }
+}
 
 android {
     compileSdkVersion 29
@@ -14,6 +47,14 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    sourceSets {
+        main.java.srcDir '/src/main/generated/debug'
+    }
+//        main {
+//            java.srcDirs  = ["app/build/generated/source/proto/debug/grpcapp/build/generated/source/proto/debug/grpc"]
+//        }
+//    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -26,8 +67,21 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    implementation 'io.grpc:grpc-okhttp:1.32.1' // CURRENT_GRPC_VERSION
+    implementation 'io.grpc:grpc-protobuf-lite:1.32.1' // CURRENT_GRPC_VERSION
+    implementation 'io.grpc:grpc-stub:1.32.1' // CURRENT_GRPC_VERSION
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
 }
+
+task blabla {
+    println(android.sourceSets.main.java.srcDirs)
+}
+
+//task test {
+//    ObjectFactory.
+//    "${project}"
+//}
