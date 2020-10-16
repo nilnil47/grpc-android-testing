@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "startStreaming");
         Service.Empty request = Service.Empty.newBuilder().build();
 //        Service.Empty empty = blockingStub.sendChatMessage(Service.ChatMessage.newBuilder().setId(1).setMessage("aaa").build());
-        GrpcTask
         asyncStub.startChatMessageStreaming(request, new StreamObserver<Service.ChatMessage>() {
             @Override
             public void onNext(Service.ChatMessage value) {
@@ -54,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         port = 50051;
         ManagedChannel mChannel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         asyncStub = MapleServiceGrpc.newStub(mChannel);
-        mChannel.
 //        blockingStub = MapleServiceGrpc.newBlockingStub(mChannel);
 
 
