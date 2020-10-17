@@ -22,66 +22,40 @@ public class MainActivity extends AppCompatActivity {
     private MapleServiceGrpc.MapleServiceStub asyncStub;
     private MapleServiceGrpc.MapleServiceBlockingStub blockingStub;
     private ManagedChannel mChannel;
+    private StreamObserver<Service.RequestEvent> requestStream;
 
 
     void startStreaming() {
         Log.d(TAG, "startStreaming");
-        blockingStub = MapleServiceGrpc.newBlockingStub(mChannel);
-        Service.Empty res = blockingStub.sendChatMessage(Service.ChatMessage.newBuilder().setId(1).setMessage("aaa").build());
-        Log.d(TAG, "startStreaming: " + res);
-//        asyncStub.sendChatMessage(Service.ChatMessage.newBuilder().setId(1).setMessage("aaa").build(),
-//                new StreamObserver<Service.Empty>() {
-//
-//                    @Override
-//                    public void onNext(Service.Empty value) {
-//                        Log.d(TAG, "onNext: ");
-//
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable t) {
-//                        Log.d(TAG, "onError: " + t);
-//
-//                    }
-//
-//                    @Override
-//                    public void onCompleted() {
-//                        Log.d(TAG, "onComplete: ");
-//
-//                    }
-//                });
-//        Service.Empty request = Service.Empty.newBuilder().build();
+//        blockingStub = MapleServiceGrpc.newBlockingStub(mChannel);
+        requestStream = asyncStub.eventsStream(new StreamObserver<Service.ResponseEvent>() {
+            @Override
+            public void onNext(Service.ResponseEvent value) {
+                Log.d(TAG, "onNext: ");
+            }
 
-//        Service.Empty empty = blockingStub.sendChatMessage(Service.ChatMessage.newBuilder().setId(1).setMessage("aaa").build());
-//        asyncStub.startChatMessageStreaming(request, new StreamObserver<Service.ChatMessage>() {
-//            @Override
-//            public void onNext(Service.ChatMessage value) {
-//                Log.d(TAG, "onNext: " + value.getMessage());
-//            }
-//
-//            @Override
-//            public void onError(Throwable t) {
-//                Log.d(TAG, "onError: " + t);
-//            }
-//
-//            @Override
-//            public void onCompleted() {
-//                Log.d(TAG, "onCompleted: ");
-//            }
-//        });
+            @Override
+            public void onError(Throwable t) {
+                Log.d(TAG, "onError: ");
+            }
+
+            @Override
+            public void onCompleted() {
+                Log.d(TAG, "onCompleted: ");
+            }
+        });
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        savedInstanceState.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         host = "192.168.1.29";
         port = 50051;
         mChannel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
 //        client = new
-//        asyncStub = MapleServiceGrpc.newStub(mChannel);
-
-
+        asyncStub = MapleServiceGrpc.newStub(mChannel);
+        startStreaming();
 
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,7 +63,14 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        startStreaming();
+                        requestStream.onNext(
+                                Service.RequestEvent.newBuilder().
+                                        setDropItem(Service.DropItem.newBuilder().
+                                                setId(111).
+                                                setX(1).
+                                                setY(3).build()
+                                        ).build()
+                        );
                     }
                 }).start();
             }
